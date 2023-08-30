@@ -127,7 +127,7 @@ export type Options<T> = {
 | `responseInterceptors` | `[OnFulfilled<AxiosResponse>,OnRejected]`       | 否       | 响应拦截器                                                                     |
 | `authorizationToken`   | `string`                                        | 否       | Token 的 key，若请求头中需要携带 Authorization，目前仅能从 localStorage 中读取 |
 
--拦截器的具体配置方法参照[官方文档](https://axios-http.com/docs/interceptors)。
+拦截器的具体配置方法参照[官方文档](https://axios-http.com/docs/interceptors)。
 
 _❗️ 需要注意的是，使用 `requestCreator` 创建后的 Axios 实例会丢失官方的请求拦截和响应拦截的配置方式，需要使用 `requestInterceptors` 和 `responseInterceptors` 配置项，同时也无法使用多拦截器的特性。_
 
