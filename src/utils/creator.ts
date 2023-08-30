@@ -22,7 +22,7 @@ const TIMEOUT = {
     DELETE: 'DELETE',
   }
   
-  export const requestCreator = <T extends any>({
+  export const creator = <T extends any>({
     // 请求拦截器
     requestInterceptors,
     // 响应拦截器

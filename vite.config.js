@@ -19,7 +19,7 @@ export default defineConfig({
     dts({
       outDir: ["./build/es", "./build/umd"],
       include: ["./src"],
-      // rollupTypes: true,
+      rollupTypes: true,
       copyDtsFiles: true,
     }),
   ],
