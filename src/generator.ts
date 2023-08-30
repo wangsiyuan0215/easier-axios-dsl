@@ -69,7 +69,7 @@ const apiTransfer = (request: RequestInstance<any>, requestString: string) => {
 
     return request(
       {
-        url: `${import.meta.env.VITE_API_BASE_URL}${finalUrl}${finalQueries}`,
+        url: `${finalUrl}${finalQueries}`,
         method: method.toLocaleUpperCase(),
         ...(isObject(data) && !isArray(data) && isEmpty(data) ? {} : { params: data }),
         ...omit(otherAxiosConfig, ['url', 'params']),
