@@ -14,7 +14,7 @@ type OtherPayload = Record<string, any>
 // Axios 运行时配置，如果需要配置此参数，请将第二个参数设置为 undefined
 type AxiosConfig = AxiosRequestConfig
 
-type RequestParams = [MajorPayload, OtherPayload?, AxiosConfig?]
+type RequestParams = [MajorPayload?, OtherPayload?, AxiosConfig?]
 
 const injectPathQueriesIntoUrl = (url: string, pathQueries: Record<string, string>) =>
   url.replace(/{(.*)}/g, (_, b) => pathQueries[b])
@@ -27,8 +27,10 @@ const MATCH_DATA_STRING = new RegExp('(?<=\\s(d|(data))(\\.(f|formData))?:)(\\S*
 const MATCH_PATH_STRING = new RegExp('(?<=\\spath:)(\\S*)')
 const MATCH_QUERY_STRING = new RegExp('(?<=\\s(q|query):)(\\S*)')
 
-const getNewObjectByKeysFrom = (target: OtherPayload, keys: (keyof typeof target)[]) =>
-  keys.reduce((acc: Record<string, any>, key: string) => ({ ...acc, [key]: target[key] }), {})
+const getNewObjectByKeysFrom = (target?: OtherPayload, keys?: string[]) => {
+  if (!target || !keys?.length) return {};
+  return keys.reduce((acc: Record<string, any>, key: string) => ({ ...acc, [key]: target[key] }), {})
+}
 
 const apiTransfer = (request: RequestInstance<any>, requestString: string) => {
   const [method, url] = requestString.split(SEPARATOR)

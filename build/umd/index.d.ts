@@ -22,7 +22,7 @@ declare interface ExceptionInfo {
     others: unknown
 }
 
-export declare const G: <T extends Record<string, string>>(request: RequestInstance<any>, apis: T) => Record<keyof T, (args_0: MajorPayload, args_1?: OtherPayload | undefined, args_2?: AxiosConfig | undefined) => Promise<BasicResponse<any>>>;
+export declare const G: <T extends Record<string, string>>(request: RequestInstance<any>, apis: T) => Record<keyof T, (args_0?: MajorPayload | undefined, args_1?: OtherPayload | undefined, args_2?: AxiosConfig | undefined) => Promise<BasicResponse<any>>>;
 
 declare type MajorPayload = Record<string, any> | any[];
 
