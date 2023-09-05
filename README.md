@@ -78,7 +78,7 @@ export default generatorAPIS<typeof APIS>(APIS);
 
 @siyuan0215/easier-axios-dsl 基于 Axios 进行二次封装。
 
-考虑到可扩展性，我们提供了 `requestCreator(options: AxiosRequestConfig & Options<T>)` 方法需要您自行创建一个 axios 的实例。
+考虑到可扩展性，我们提供了 `requestCreator(options: AxiosRequestConfig & Options<T>)` 方法需要您自行创建一个 Axios 的实例，并允许我们对其进行静态地配置。
 
 ```ts
 // utils/generateAPIs.ts
@@ -90,6 +90,7 @@ const otherAxiosConfig = {
   withCredentials: true,
 };
 
+// 创建一个 Axios 的实例，参数为静态配置
 export const request = requestCreator({
   requestInterceptors: [
     /* ... */
@@ -101,9 +102,27 @@ export const request = requestCreator({
   ...otherAxiosConfig,
 });
 
+// 当前版本下，此具名导出必不可少
 export const generatorAPIS = <T extends {}>(apiConfig: T) =>
   G<T>(request, apiConfig);
 ```
+
+_❗️ 请注意，看上去上述代码有些繁琐，本可以将静态配置传入 `G` 函数中，直接返回 `generatorAPIS` 函数即可。但是考虑到在项目中可能有些接口对接需要用到 Axios 实例，因此我们决定将其暴露出来。_
+
+`requestCreator` 函数返回的请求示例 `request` 函数参数类型声明如下：
+
+```ts
+request(
+  { method, url, params, ...restOptions }: {
+      url: AxiosRequestConfig["url"];
+      method: AxiosRequestConfig["method"];
+      params: AxiosRequestConfig["params"] | AxiosRequestConfig["data"];
+    } & Omit<AxiosRequestConfig<any>, "url" | "method" | "params" | "data">,
+  // 是否将 body 体封装为 formData
+  isFormData?: boolean | undefined): Promise<BasicResponse<T>>
+```
+
+我们保（tou）留（lan）了 Axios 的配置，同时提供了如下配置项：
 
 ```ts
 export type Options<T> = {
@@ -119,8 +138,6 @@ export type Options<T> = {
 };
 ```
 
-我们保（tou）留（lan）了 Axios 的配置，同时提供了如下配置项：
-
 | 参数                   | 类型                                            | 是否必填 | 说明                                                                           |
 | ---------------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
 | `requestInterceptors`  | `[OnFulfilled<AxiosRequestConfig>, OnRejected]` | 否       | 请求拦截器                                                                     |
@@ -129,7 +146,7 @@ export type Options<T> = {
 
 拦截器的具体配置方法参照[官方文档](https://axios-http.com/docs/interceptors)。
 
-_❗️ 需要注意的是，使用 `requestCreator` 创建后的 Axios 实例会丢失官方的请求拦截和响应拦截的配置方式，需要使用 `requestInterceptors` 和 `responseInterceptors` 配置项，同时也无法使用多拦截器的特性。_
+_❗️ 需要注意的是，使用 `requestCreator` 创建后的 Axios 实例会丢失官方的请求拦截和响应拦截的**静态**配置方式，需要使用 `requestInterceptors` 和 `responseInterceptors` 配置项，同时也无法使用多拦截器的特性。_
 
 ## 🧑🏽‍💻 如何使用？
 
