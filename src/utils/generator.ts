@@ -67,7 +67,7 @@ const apiTransfer = (request: RequestInstance<any>, requestString: string) => {
       query = getNewObjectByKeysFrom(majorPayload, queryKeys)
     }
     const finalUrl = hasPathQueries ? injectPathQueriesIntoUrl(url, path) : url
-    const finalQueries = queryKeys ? `?${qs.stringify(query)}` : ''
+    const finalQueries = !isEmpty(query) ? `?${qs.stringify(query)}` : ''
 
     return request(
       {
