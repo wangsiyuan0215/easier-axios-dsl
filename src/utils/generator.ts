@@ -74,7 +74,7 @@ const apiTransfer = (request: RequestInstance<any>, requestString: string) => {
         url: `${finalUrl}${finalQueries}`,
         method: method.toLocaleUpperCase(),
         ...(isObject(data) && !isArray(data) && isEmpty(data) ? {} : { params: data }),
-        ...omit(otherAxiosConfig, ['url', 'params']),
+        ...omit(otherAxiosConfig, ['url', 'data', 'method', 'params']),
       },
       isFormData
     )

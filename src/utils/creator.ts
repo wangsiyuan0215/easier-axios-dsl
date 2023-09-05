@@ -45,22 +45,22 @@ export const creator = <T extends any>({
   if (responseInterceptors.length)
     api.interceptors.response.use(...responseInterceptors);
 
+  type RestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'params' | 'data'>
+
   return function request(
     {
       method,
       url,
       params,
-      responseType,
-      baseUrl,
+      ...restOptions
     }: {
       url: AxiosRequestConfig["url"];
       method: AxiosRequestConfig["method"];
       params: AxiosRequestConfig["params"] | AxiosRequestConfig["data"];
-      baseUrl?: AxiosRequestConfig["baseURL"];
-      responseType?: AxiosRequestConfig["responseType"];
-    },
+    } & RestOptions,
     isFormData = false
   ): Promise<BasicResponse<T>> {
+    const { baseURL, headers = {}, responseType } = (restOptions || {}) as RestOptions;
     let authorization: string = "";
     if (authorizationToken) {
       try {
@@ -91,9 +91,11 @@ export const creator = <T extends any>({
         "Content-Type": isFormData
           ? CONTENT_TYPES.FORM_DATA
           : CONTENT_TYPES.JSON,
+        ...headers
       },
-      ...(baseUrl ? { baseUrl } : {}),
+      ...(baseURL ? { baseURL } : {}),
       ...(responseType ? { responseType } : {}),
+      ...restOptions,
     }).then((res) => res.data);
   };
 };
