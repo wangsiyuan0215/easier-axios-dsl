@@ -3,7 +3,7 @@ import qs from 'qs'
 import { isArray, isEmpty, isObject, omit } from 'lodash-es'
 import type { AxiosRequestConfig } from 'axios'
 
-import type { BasicResponse, RequestInstance } from './typing'
+import type { RequestInstance } from './typing'
 
 /* 一般情况下，使用此参数即可 */
 type MajorPayload = Record<string, any> | any[]
@@ -88,4 +88,4 @@ export const generatorAPIS = <T extends Record<string, string>>(request: Request
       [key]: apiTransfer(request, apis[key]),
     }),
     {}
-  ) as Record<keyof T, (...args: RequestParams) => Promise<BasicResponse<any>>>
+  ) as Record<keyof T, (...args: RequestParams) => Promise<any>>

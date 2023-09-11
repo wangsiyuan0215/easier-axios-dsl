@@ -98,7 +98,6 @@ export const request = requestCreator({
   responseInterceptors: [
     /* ... */
   ],
-  authorizationToken: LOCALSTORAGE_KEYS.TOKEN,
   ...otherAxiosConfig,
 });
 
@@ -119,8 +118,10 @@ request(
       params: AxiosRequestConfig["params"] | AxiosRequestConfig["data"];
     } & Omit<AxiosRequestConfig<any>, "url" | "method" | "params" | "data">,
   // 是否将 body 体封装为 formData
-  isFormData?: boolean | undefined): Promise<BasicResponse<T>>
+  isFormData?: boolean | undefined): Promise<T>
 ```
+
+`request` 函数中传递请求体数据的属性是 `params`，不论是 `POST` 还是 `GET` 请求方式，均通过这个字段传递。
 
 我们保（tou）留（lan）了 Axios 的配置，同时提供了如下配置项：
 
@@ -129,20 +130,14 @@ export type Options<T> = {
   // 请求拦截器
   requestInterceptors: [OnFulfilled<AxiosRequestConfig>, OnRejected];
   // 响应拦截器
-  responseInterceptors: [
-    OnFulfilled<AxiosResponse<BasicResponse<T>>>,
-    OnRejected
-  ];
-  // 如果需要 auth token 的话，指定 token 的 localStorage 的 key
-  authorizationToken?: string;
+  responseInterceptors: [OnFulfilled<AxiosResponse<T>>, OnRejected];
 };
 ```
 
-| 参数                   | 类型                                            | 是否必填 | 说明                                                                           |
-| ---------------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `requestInterceptors`  | `[OnFulfilled<AxiosRequestConfig>, OnRejected]` | 否       | 请求拦截器                                                                     |
-| `responseInterceptors` | `[OnFulfilled<AxiosResponse>,OnRejected]`       | 否       | 响应拦截器                                                                     |
-| `authorizationToken`   | `string`                                        | 否       | Token 的 key，若请求头中需要携带 Authorization，目前仅能从 localStorage 中读取 |
+| 参数                   | 类型                                            | 是否必填 | 说明       |
+| ---------------------- | ----------------------------------------------- | -------- | ---------- |
+| `requestInterceptors`  | `[OnFulfilled<AxiosRequestConfig>, OnRejected]` | 否       | 请求拦截器 |
+| `responseInterceptors` | `[OnFulfilled<AxiosResponse>,OnRejected]`       | 否       | 响应拦截器 |
 
 拦截器的具体配置方法参照[官方文档](https://axios-http.com/docs/interceptors)。
 

@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, Method } from "axios";
 
-import type { BasicResponse, Options, RequestInstance } from "./typing";
+import type { Options, RequestInstance } from "./typing";
 
 // 默认超时时间
 const TIMEOUT = {
@@ -27,8 +27,6 @@ export const creator = <T extends any>({
   requestInterceptors,
   // 响应拦截器
   responseInterceptors,
-  // 如果需要 auth token 的话，指定 token 的 localStorage 的 key
-  authorizationToken,
   // axios 配置
   ...restOptions
 }: AxiosRequestConfig & Options<T>): RequestInstance<T> => {
@@ -47,55 +45,50 @@ export const creator = <T extends any>({
 
   type RestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'params' | 'data'>
 
-  return function request(
+  return async function request(
     {
-      method,
       url,
+      method,
       params,
-      ...restOptions
+      ...restOptions2
     }: {
       url: AxiosRequestConfig["url"];
       method: AxiosRequestConfig["method"];
       params: AxiosRequestConfig["params"] | AxiosRequestConfig["data"];
     } & RestOptions,
     isFormData = false
-  ): Promise<BasicResponse<T>> {
-    const { baseURL, headers = {}, responseType } = (restOptions || {}) as RestOptions;
-    let authorization: string = "";
-    if (authorizationToken) {
-      try {
-        authorization = localStorage.getItem(authorizationToken) ?? "";
-      } catch (error) {
-        authorization = "";
-      }
+  ) {
+    const { headers = {}, ...restOptions3 } = (restOptions2 || {}) as RestOptions;
+    
+    try {
+     const { data } = await api({
+        url,
+        data:
+          method === METHODS.POST || method === METHODS.PUT
+            ? isFormData
+              ? Object.keys(params).reduce(
+                  (acc: FormData, key) => (
+                    // eslint-disable-next-line no-sequences
+                    acc.append(key, params[key]), acc
+                  ),
+                  new FormData()
+                )
+              : params
+            : undefined,
+        method,
+        params:
+          method === METHODS.GET || method === METHODS.DELETE ? params : null,
+        headers: {
+          "Content-Type": isFormData
+            ? CONTENT_TYPES.FORM_DATA
+            : CONTENT_TYPES.JSON,
+          ...headers
+        },
+        ...restOptions3,
+      })
+      return data
+    } catch(error) {
+      throw error
     }
-    return api({
-      url,
-      method,
-      data:
-        method === METHODS.POST || method === METHODS.PUT
-          ? isFormData
-            ? Object.keys(params).reduce(
-                (acc: FormData, key) => (
-                  // eslint-disable-next-line no-sequences
-                  acc.append(key, params[key]), acc
-                ),
-                new FormData()
-              )
-            : params
-          : undefined,
-      params:
-        method === METHODS.GET || method === METHODS.DELETE ? params : null,
-      headers: {
-        ...(authorizationToken ? { authorization } : {}),
-        "Content-Type": isFormData
-          ? CONTENT_TYPES.FORM_DATA
-          : CONTENT_TYPES.JSON,
-        ...headers
-      },
-      ...(baseURL ? { baseURL } : {}),
-      ...(responseType ? { responseType } : {}),
-      ...restOptions,
-    }).then((res) => res.data);
   };
 };
