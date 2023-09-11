@@ -3,10 +3,7 @@ import axios, { AxiosRequestConfig, Method } from "axios";
 import type { Options, RequestInstance } from "./typing";
 
 // 默认超时时间
-const TIMEOUT = {
-  DEFAULT: 60000,
-  UPLOADING: 5 * 60000,
-};
+const TIMEOUT_DEFAULT = 60000;
 
 // 默认请求内容类型
 const CONTENT_TYPES = {
@@ -27,12 +24,12 @@ export const creator = <T extends any>({
   requestInterceptors,
   // 响应拦截器
   responseInterceptors,
-  // axios 配置
-  ...restOptions
+  // Axios 静态全局配置
+  ...axiosGlobalStaticOptions
 }: AxiosRequestConfig & Options<T>): RequestInstance<T> => {
   const api = axios.create({
-    timeout: TIMEOUT.DEFAULT, // 请求 60s 超时
-    ...restOptions,
+    timeout: TIMEOUT_DEFAULT,
+    ...axiosGlobalStaticOptions,
   });
 
   // 请求拦截器
@@ -43,14 +40,17 @@ export const creator = <T extends any>({
   if (responseInterceptors.length)
     api.interceptors.response.use(...responseInterceptors);
 
-  type RestOptions = Omit<AxiosRequestConfig, 'url' | 'method' | 'params' | 'data'>
+  type RestOptions = Omit<
+    AxiosRequestConfig,
+    "url" | "method" | "params" | "data"
+  >;
 
   return async function request(
     {
       url,
       method,
       params,
-      ...restOptions2
+      ...restOptions
     }: {
       url: AxiosRequestConfig["url"];
       method: AxiosRequestConfig["method"];
@@ -58,37 +58,37 @@ export const creator = <T extends any>({
     } & RestOptions,
     isFormData = false
   ) {
-    const { headers = {}, ...restOptions3 } = (restOptions2 || {}) as RestOptions;
-    
+    const { headers = {}, ...restRuntimeOptions } = (restOptions ||
+      {}) as RestOptions;
+
     try {
-     const { data } = await api({
+      const { data } = await api({
         url,
-        data:
-          method === METHODS.POST || method === METHODS.PUT
-            ? isFormData
-              ? Object.keys(params).reduce(
-                  (acc: FormData, key) => (
-                    // eslint-disable-next-line no-sequences
-                    acc.append(key, params[key]), acc
-                  ),
-                  new FormData()
-                )
-              : params
-            : undefined,
         method,
-        params:
-          method === METHODS.GET || method === METHODS.DELETE ? params : null,
         headers: {
           "Content-Type": isFormData
             ? CONTENT_TYPES.FORM_DATA
             : CONTENT_TYPES.JSON,
-          ...headers
+          ...headers,
         },
-        ...restOptions3,
-      })
-      return data
-    } catch(error) {
-      throw error
+        ...(method === METHODS.POST || method === METHODS.PUT
+          ? {
+              data: isFormData
+                ? Object.keys(params).reduce(
+                    (acc: FormData, key) => (acc.append(key, params[key]), acc),
+                    new FormData()
+                  )
+                : params,
+            }
+          : {}),
+        ...(method === METHODS.GET || method === METHODS.DELETE
+          ? { params }
+          : {}),
+        ...restRuntimeOptions,
+      });
+      return data;
+    } catch (error) {
+      throw error;
     }
   };
 };

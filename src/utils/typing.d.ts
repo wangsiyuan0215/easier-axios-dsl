@@ -11,7 +11,7 @@ export interface ExceptionInfo {
 
 export type OnFulfilled<T extends AxiosRequestConfig> = (value: T) => T | Promise<T>
 export type OnRejected = (error: any) => any
-export type Options<T> = {
+export type Options<T extends any> = {
   requestInterceptors: [OnFulfilled<AxiosRequestConfig>, OnRejected]
   responseInterceptors: [OnFulfilled<AxiosResponse<T>>, OnRejected]
 }
