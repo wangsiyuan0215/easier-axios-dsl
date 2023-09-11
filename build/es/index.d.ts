@@ -11,14 +11,14 @@ declare type OnFulfilled<T extends AxiosRequestConfig> = (value: T) => T | Promi
 
 declare type OnRejected = (error: any) => any
 
-declare type Options<T> = {
+declare type Options<T extends any> = {
     requestInterceptors: [OnFulfilled<AxiosRequestConfig>, OnRejected]
     responseInterceptors: [OnFulfilled<AxiosResponse<T>>, OnRejected]
 }
 
 declare type OtherPayload = Record<string, any>;
 
-export declare const requestCreator: <T extends unknown>({ requestInterceptors, responseInterceptors, ...restOptions }: AxiosRequestConfig<any> & Options<T>) => RequestInstance<T>;
+export declare const requestCreator: <T extends unknown>({ requestInterceptors, responseInterceptors, ...axiosGlobalStaticOptions }: AxiosRequestConfig<any> & Options<T>) => RequestInstance<T>;
 
 declare type RequestInstance<T extends any> = (
 options: any,
