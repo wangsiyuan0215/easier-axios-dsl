@@ -1,0 +1,53 @@
+{
+  "name": "@siyuan0215/easier-axios-dsl",
+  "description": "A DSL for axios, which makes it easier to use axios.",
+  "version": "1.1.11",
+  "type": "module",
+  "files": [
+    "build/*"
+  ],
+  "keywords": [
+    "axios",
+    "dsl",
+    "api"
+  ],
+  "main": "./build/umd/index.js",
+  "module": "./build/es/index.js",
+  "types": "./build/es/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "http-status-codes": "2.2.0",
+    "lodash-es": "4.17.21",
+    "qs": "6.11.0"
+  },
+  "peerDependencies": {
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.8",
+    "@types/qs": "^6.9.7",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.5.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./build/es/index.js",
+      "require": "./build/umd/index.js"
+    }
+  },
+  "author": "siyuan0215",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/wangsiyuan0215/easier-axios-dsl",
+    "type": "git"
+  },
+  "homepage": "https://github.com/wangsiyuan0215/easier-axios-dsl#readme",
+  "bugs": {
+    "url": "https://github.com/wangsiyuan0215/easier-axios-dsl/issues"
+  }
+}
