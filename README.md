@@ -1,24 +1,24 @@
-# 🌈 @siyuan0215/easier-axios-dsl
+# @siyuan0215/easier-axios-dsl
 
 基于 [Axios](https://www.npmjs.com/package/axios) 以及借鉴了简单的 DSL（领域特定语言）制定了一套基本规则用于接口对接，减少冗余、重复的接口声明模板代码，提高开发效率。
 
 ## 🤖 如何安装？
 
-使用 npm 安装：
+使用 NPM 安装：
 
 ```bash
-npm i @siyuan0215/easier-axios-dsl@latest
+npm i @siyuan0215/easier-axios-dsl
 ```
 
-使用 yarn 安装：
+使用 Yarn 安装：
 
 ```bash
-yarn add @siyuan0215/easier-axios-dsl@latest
+yarn add @siyuan0215/easier-axios-dsl
 ```
 
 ## 🤙 优势
 
-未使用 @siyuan0215/easier-axios-dsl 之前，我们需要在接口声明文件中添加如下代码：
+未使用 easier-axios-dsl 之前，我们再对接接口的时候往往需要添加如下代码：
 
 ```ts
 // api/index.ts
@@ -46,14 +46,14 @@ export const saveUserInfo = (userInfo: UserInfo) =>
   });
 ```
 
-从上述代码中可以看出，在声明接口时有很多重复性的代码（模板代码），这种方式有两个痛点：
+可以看出，在声明接口时有很多重复的模板代码，这种方式主要有两个痛点：
 
-- 若接口较多，由大量的模板代码导致的冗余代码会增加，前端资源体积会增大；
-- 极大地影响了开发人员的效率；
+- 接口较多时，大量的模板代码导致的冗余的代码增加，前端资源体积会增大；
+- 影响了开发小伙伴的开发效率；
 
-@siyuan0215/easier-axios-dsl 利用简单的特定领域语言解决了上述的两个痛点，一定程度上节约了开发人员对接接口的时间。
+easier-axios-dsl 利用简单的“特定领域语言”优化了上述的两个痛点，一定程度上提高了开发的效率和减少了冗余的代码。
 
-对于上述的代码例子，使用 @siyuan0215/easier-axios-dsl 进行改造：
+对于上述的代码例子，使用 easier-axios-dsl 进行改造：
 
 ```ts
 // api/index.ts
@@ -68,15 +68,15 @@ enum APIS {
 export default generatorAPIS<typeof APIS>(APIS);
 ```
 
-可以明显看出，使用 @siyuan0215/easier-axios-dsl 声明的接口会更加的简洁，效率会更高。
+可以明显看出，使用 easier-axios-dsl 对接接口时 coding 更顺畅也更简洁。
 
-默认导出的 `generatorAPIS<typeof APIS>(APIS);` 函数执行结果是对象。
+_默认导出的 `generatorAPIS<typeof APIS>(APIS);` 函数执行结果是对象。_
 
-接口对象是以我们声明的接口的名字作为 key（比如 `getUserInfo`），以 Promise 作为返回结果的函数为值。因此对于处理接口函数的返回，既可以使用 `async / await` 也可以使用 Promise 处理回调的方式。
+需要注意的是，接口对象是以我们**声明的接口的名字**作为 key（比如 `getUserInfo`），以 `Promise` 作为值。因此我们既可以使用 `async / await` 也可以使用 `Promise` 处理请求的回调。
 
 ## ⚙️ 如何静态（全局）配置？
 
-@siyuan0215/easier-axios-dsl 基于 Axios 进行二次封装。
+easier-axios-dsl 基于 Axios 进行二次封装。
 
 考虑到可扩展性，我们提供了 `requestCreator(options: AxiosRequestConfig & Options<T>)` 方法需要您自行创建一个 Axios 的实例，并允许我们对其进行静态地配置。
 
@@ -108,7 +108,7 @@ export const generatorAPIS = <T extends {}>(apiConfig: T) =>
 
 _❗️ 请注意，看上去上述代码有些繁琐，本可以将静态配置传入 `G` 函数中，直接返回 `generatorAPIS` 函数即可。但是考虑到在项目中可能有些接口对接需要用到 Axios 实例，因此我们决定将其暴露出来。_
 
-`requestCreator` 函数返回的请求示例 `request` 函数参数类型声明如下：
+`requestCreator` 函数返回的请求实例 `request` 函数参数类型声明如下：
 
 ```ts
 request(
@@ -121,7 +121,7 @@ request(
   isFormData?: boolean | undefined): Promise<T>
 ```
 
-`request` 函数中传递请求体数据的属性是 `params`，不论是 `POST` 还是 `GET` 请求方式，均通过这个字段传递。
+`request` 函数中接收传递请求体数据的 key 是 `params`，不论是 `POST` 还是 `GET` 请求方式，均通过这个字段传递。
 
 我们保（tou）留（lan）了 Axios 的配置，同时提供了如下配置项：
 
@@ -145,13 +145,13 @@ _❗️ 需要注意的是，使用 `requestCreator` 创建后的 Axios 实例�
 
 ## 🧑🏽‍💻 如何使用？
 
-继续以上述改造后的接口声明文件为例，我们现在声明了如下三个接口：
+继续以上述改造后的接口声明文件为例，我们创建了如下三个接口的函数（服务）：
 
 - `getUserInfo`；
 - `getPosts`；
 - `saveUserInfo`；
 
-只需要我们在对应的业务组件中，引入我们的接口对象，然后调用对应的函数即可。
+只需要我们在对应的业务组件中，引入我们的接口函数，调用即可。
 
 ```HTML
 <script lang="ts">
@@ -168,7 +168,7 @@ const fetchUserInfo = async (userId: string) => {
 </script>
 ```
 
-接口对象中每个值函数的类型如下：
+接口函数中的类型如下：
 
 ```ts
 type ApiRequestUrlMethod = (
@@ -188,6 +188,8 @@ _❗️ 如果需要给请求添加运行时配置 `AxiosConfig`，又不需要�
 
 ```ts
 APIS.exportFile(params, undefined, { responseType: "blob" });
+// or
+APIS.exportFile(params, void 0, { responseType: "blob" });
 ```
 
 ## 🔌 如何新增接口声明？
@@ -195,22 +197,22 @@ APIS.exportFile(params, undefined, { responseType: "blob" });
 新声明一个接口时，需要遵照如下格式，每个部分（以 `[]` 内为一部分）均以空格隔开：
 
 ```bash
-[POST|GET|PUT|DELETE|...] [url] [[(d|data|d.f|d.formData|data.f|data.formData|[d]|[data])|(q|query)|path]:[(keys with `,`)|`*`]]
+[POST|GET|PUT|DELETE|...] [url] [(d|data)|(d.f|d.formData|data.f|data.formData)|([d]|[data]))|(q|query)|path]:[(id,name,gender,...)|'*']
 ```
 
 其中：
 
-- `POST|GET|PUT|DELETE|...`：表示 HTTP 请求方式；
-- `url`：表示请求地址；
-- 参数类型，格式为 `[参数类型]:[需要传递的 key]`，**请注意需要以 `:` 冒号相连（不能出现空格）**：
-  - `(d|data|d.f|d.formData|data.f|data.formData|[d]|[data])` 对应 `POST` 或 `PUT` 请求的 body 体，其中：
-    - 仅 `d` 或 `data` 表示普通 body 体对象；
-    - `d.f` 或 `d.formData` 或 `data.f` 或 `data.formData` 表示需要传递的是 FormData 类型，但是调用时仍然需要传递对象（内部会帮助你处理好）；
-    - `[d|data]` 表示 body 体传递的是数组，等价于：`{ ...AxiosConfig, data: [1,2,3,4] }`；
-  - `q|query` 传递给 GET 或 DELETE 请求的 query 参数；
-  - `path` 表示将参数放到请求地址中进行传递，比如：`api/getUserInfo/{uesrId}`；
-- 参数的 keys：
-  - 枚举，如果有明确的 key，那么请以 `,` 逗号相连（**不能出现空格**），且最终传递给后端接口时以此处声明的 key 为准；
+- `POST|GET|PUT|DELETE|...` HTTP 的请求方式；
+- `url` 请求地址；
+- 请求参数，格式为 `[参数载体类型]:[传递的参数 key]`，请注意**参数载体类型**和**需要传递的参数**需要以 `:` 冒号相连（不能出现空格）
+  - `(d|data)|(d.f|d.formData|data.f|data.formData)|([d]|[data]))` 对应 `POST` 或 `PUT` 请求的 Body 体，其中：
+    - 仅 `d` 或 `data` 指将参数放到正常 Body 体中（对象类型）；
+    - `d.f` 或 `d.formData` 或 `data.f` 或 `data.formData` 指需要传递的是 FormData 类型，但是调用接口函数时传递对象类型（内部会帮助你处理好）；
+    - `[d|data]` 指 Body 体传递的是数组，等价于：`data: [1,2,3,4]`；
+  - `q|query` 传递给 `GET` 或 `DELETE` 请求的 query 参数；
+  - `path` 表示将参数放到请求地址中进行传递（动态路由），比如：`api/getUserInfo/{uesrId}`；
+- `[(id,name,gender,...)|'*']` 参数的 key
+  - 枚举，如果有明确的 key，那么请以 `,` 逗号相连（**不能出现空格**），且最终请求后端接口时所传递的参数以此处声明的 key 为准；
   - 通配符 `*` 如果需要传递的参数比较多，可以使用 `*` 来表示将所有的参数全部传给后端（跳过参数校验的阶段）；
 
 我们以 `GET` 和 `POST` 请求举几个例子，帮助大家理解：
@@ -241,3 +243,11 @@ APIS.exportFile(params, undefined, { responseType: "blob" });
  *        equal: (id: string) => api.get({ url: baseUrl + 'users/get/' + id })
  * */
 ```
+
+## 📦 未来计划？
+
+- [ ] 单元测试的编写；
+- [ ] 支持多拦截器；
+- [ ] 支持更多的请求方式；
+- [ ] 支持更多的参数载体类型；
+- [ ] 支持原生小程序；

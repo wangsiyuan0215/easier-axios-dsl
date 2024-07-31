@@ -17,9 +17,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "http-status-codes": "2.2.0",
     "lodash-es": "4.17.21",
     "qs": "6.11.0"
@@ -30,9 +33,11 @@
   "devDependencies": {
     "@types/lodash-es": "^4.17.8",
     "@types/qs": "^6.9.7",
+    "@vitest/coverage-v8": "^2.0.4",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
-    "vite-plugin-dts": "^3.5.3"
+    "vite-plugin-dts": "^3.5.3",
+    "vitest": "^2.0.4"
   },
   "exports": {
     ".": {
