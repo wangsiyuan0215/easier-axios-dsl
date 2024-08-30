@@ -21,11 +21,9 @@ const SEPARATOR = /\s{1,}/;
 const COMMON_PATTERN = "*";
 const IF_DATA_IS_ARRAY = /\s\[d|(data)]\s?/;
 const IF_DATA_IS_FORM_DATA = /\s(d|(data))\.(f|formData):/;
-const MATCH_DATA_STRING = new RegExp(
-  "(?<=\\s(d|(data))(\\.(f|formData))?:)(\\S*)"
-);
-const MATCH_PATH_STRING = new RegExp("(?<=\\spath:)(\\S*)");
-const MATCH_QUERY_STRING = new RegExp("(?<=\\s(q|query):)(\\S*)");
+const MATCH_DATA_STRING = /\s+(d|data)(\.(f|formData))?:(\S*)(\s|$)/;
+const MATCH_PATH_STRING = /\s+path:(\S*)(\s|$)/;
+const MATCH_QUERY_STRING = /\s+(q|query):(\S*)(\s|$)/;
 
 export const getNewObjectByKeysFrom = (target?: Payload, keys?: string[]) => {
   if (!target || !keys?.length) return {};
@@ -80,12 +78,16 @@ export const getRequestParams = (
   ];
 };
 
-export const apiTransfer = (request: RequestInstance<any>, requestString: string) => {
+export const apiTransfer = (
+  request: RequestInstance<any>,
+  requestString: string
+) => {
   const [method, url] = requestString.split(SEPARATOR);
   const isDataArray = IF_DATA_IS_ARRAY.test(requestString);
-  const [pathKeysString] = requestString.match(MATCH_PATH_STRING) || [];
-  const [queryKeysString] = requestString.match(MATCH_QUERY_STRING) || [];
-  const [paramsKeysString] = requestString.match(MATCH_DATA_STRING) || [];
+  const [,pathKeysString] = requestString.match(MATCH_PATH_STRING) || [];
+  const [,,queryKeysString] = requestString.match(MATCH_QUERY_STRING) || [];
+  const [, , , , paramsKeysString] =
+    requestString.match(MATCH_DATA_STRING) || [];
 
   const hasPathQueries = !!pathKeysString;
 

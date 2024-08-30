@@ -1,7 +1,7 @@
 {
   "name": "@siyuan0215/easier-axios-dsl",
   "description": "A DSL for axios, which makes it easier to use axios.",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "type": "module",
   "files": [
     "build/*"
