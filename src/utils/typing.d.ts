@@ -1,4 +1,3 @@
-import { StatusCodes } from 'http-status-codes'
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 export interface ExceptionInfo {
