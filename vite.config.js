@@ -15,12 +15,13 @@ export default defineConfig({
       fileName: (f) => `${f}/index.js`,
     },
     outDir: "./build",
-  },
-  rollupOptions: {
-    external: ["axios"],
-    output: {
-      globals: {
-        vue: "axios",
+    rollupOptions: {
+      external: ["axios", "qs"],
+      output: {
+        globals: {
+          qs: 'qs',
+          axios: "axios",
+        },
       },
     },
   },
@@ -31,6 +32,6 @@ export default defineConfig({
       rollupTypes: true,
       copyDtsFiles: true,
     }),
-    visualizer({ open: true }),
+    visualizer({ open: false }),
   ],
 });
