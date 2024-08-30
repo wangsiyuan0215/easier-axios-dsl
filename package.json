@@ -1,7 +1,7 @@
 {
   "name": "@siyuan0215/easier-axios-dsl",
   "description": "A DSL for axios, which makes it easier to use axios.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "files": [
     "build/*"
@@ -47,7 +47,7 @@
   "author": "siyuan0215",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/wangsiyuan0215/easier-axios-dsl",
+    "url": "git+https://github.com/wangsiyuan0215/easier-axios-dsl.git",
     "type": "git"
   },
   "homepage": "https://github.com/wangsiyuan0215/easier-axios-dsl#readme",
