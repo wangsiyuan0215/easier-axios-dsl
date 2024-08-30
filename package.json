@@ -1,7 +1,7 @@
 {
   "name": "@siyuan0215/easier-axios-dsl",
   "description": "A DSL for axios, which makes it easier to use axios.",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "files": [
     "build/*"
@@ -21,7 +21,7 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "peerDependencies": {
+  "dependencies": {
     "qs": "6.11.0",
     "axios": "^0.24.0"
   },
@@ -33,9 +33,7 @@
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-dts": "^3.5.3",
-    "vitest": "^2.0.4",
-    "qs": "6.11.0",
-    "axios": "^0.24.0"
+    "vitest": "^2.0.4"
   },
   "exports": {
     ".": {
