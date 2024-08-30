@@ -248,7 +248,7 @@ APIS.exportFile(params, void 0, { responseType: "blob" });
 
 尽可能的覆盖所有的代码，保证代码的质量。
 
-![alt text](image.png)
+![alt text](coverage.png)
 
 
 ## 📦 未来计划？
