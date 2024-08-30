@@ -1,7 +1,7 @@
 /* eslint-disable prefer-regex-literals */
-import qs from "qs";
-import { isArray, isEmpty, isObject, omit } from "lodash-es";
+import { stringify } from "qs";
 import type { AxiosRequestConfig } from "axios";
+import { isArray, isEmpty, isObject, omit } from "./utils";
 
 import type { RequestInstance } from "./typing";
 
@@ -84,8 +84,8 @@ export const apiTransfer = (
 ) => {
   const [method, url] = requestString.split(SEPARATOR);
   const isDataArray = IF_DATA_IS_ARRAY.test(requestString);
-  const [,pathKeysString] = requestString.match(MATCH_PATH_STRING) || [];
-  const [,,queryKeysString] = requestString.match(MATCH_QUERY_STRING) || [];
+  const [, pathKeysString] = requestString.match(MATCH_PATH_STRING) || [];
+  const [, , queryKeysString] = requestString.match(MATCH_QUERY_STRING) || [];
   const [, , , , paramsKeysString] =
     requestString.match(MATCH_DATA_STRING) || [];
 
@@ -119,7 +119,7 @@ export const apiTransfer = (
         );
 
     const finalUrl = hasPathQueries ? injectPathQueriesIntoUrl(url, path) : url;
-    const finalQueries = !isEmpty(query) ? `?${qs.stringify(query)}` : "";
+    const finalQueries = !isEmpty(query) ? `?${stringify(query)}` : "";
 
     return request(
       {
