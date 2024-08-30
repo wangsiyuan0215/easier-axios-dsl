@@ -1,6 +1,7 @@
 // vite.config.js
 import dts from "vite-plugin-dts";
 import { resolve } from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -15,6 +16,14 @@ export default defineConfig({
     },
     outDir: "./build",
   },
+  rollupOptions: {
+    external: ["axios"],
+    output: {
+      globals: {
+        vue: "axios",
+      },
+    },
+  },
   plugins: [
     dts({
       outDir: ["./build/es", "./build/umd"],
@@ -22,5 +31,6 @@ export default defineConfig({
       rollupTypes: true,
       copyDtsFiles: true,
     }),
+    visualizer({ open: true }),
   ],
 });
