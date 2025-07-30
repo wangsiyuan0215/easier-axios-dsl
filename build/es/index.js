@@ -1,5 +1,5 @@
-import I from "axios";
-import { stringify as C } from "qs";
+import C from "axios";
+import { stringify as I } from "qs";
 const S = 6e4, l = {
   JSON: "application/json",
   FORM_DATA: "multipart/form-data"
@@ -16,7 +16,7 @@ const S = 6e4, l = {
   // Axios 静态全局配置
   ...r
 }) => {
-  const o = I.create({
+  const o = C.create({
     timeout: S,
     ...r
   });
@@ -25,28 +25,28 @@ const S = 6e4, l = {
     method: s,
     params: c,
     ..._
-  }, i = !1) {
-    const { headers: p = {}, ...u } = _ || {};
+  }, f = !1) {
+    const { headers: i = {}, ...u } = _ || {};
     try {
-      const { data: f } = await o({
+      const { data: T } = await o({
         url: e,
         method: s,
         headers: {
-          "Content-Type": i ? l.FORM_DATA : l.JSON,
-          ...p
+          ...i,
+          "Content-Type": f ? l.FORM_DATA : i && i["Content-Type"] || l.JSON
         },
         ...s === h.POST || s === h.PUT ? {
-          data: i ? Object.keys(c).reduce(
-            (E, T) => (E.append(T, c[T]), E),
+          data: f ? Object.keys(c).reduce(
+            (E, A) => (E.append(A, c[A]), E),
             new FormData()
           ) : c
         } : {},
         ...s === h.GET || s === h.DELETE ? { params: c } : {},
         ...u
       });
-      return f;
-    } catch (f) {
-      throw f;
+      return T;
+    } catch (T) {
+      throw T;
     }
   };
 }, D = (t) => Object.prototype.toString.call(t) === "[object Array]";
@@ -58,7 +58,7 @@ const P = (t) => t !== null && (typeof t == "object" || typeof t == "function") 
   return n.forEach((o) => {
     delete r[o];
   }), r;
-}, F = (t, n) => t.replace(/{([^{]*)}/g, (r, o) => n[o]), y = /\s{1,}/, G = "*", $ = /\s\[d|(data)]\s?/, g = /\s(d|(data))\.(f|formData):/, w = /\s+(d|data)(\.(f|formData))?:(\S*)(\s|$)/, H = /\s+path:(\S*)(\s|$)/, L = /\s+(q|query):(\S*)(\s|$)/, A = (t, n) => !t || !(n != null && n.length) ? {} : n.reduce(
+}, y = (t, n) => t.replace(/{([^{]*)}/g, (r, o) => n[o]), F = /\s{1,}/, G = "*", $ = /\s\[d|(data)]\s?/, g = /\s(d|(data))\.(f|formData):/, w = /\s+(d|data)(\.(f|formData))?:(\S*)(\s|$)/, H = /\s+path:(\S*)(\s|$)/, L = /\s+(q|query):(\S*)(\s|$)/, p = (t, n) => !t || !(n != null && n.length) ? {} : n.reduce(
   (r, o) => ({ ...r, [o]: t[o] }),
   {}
 ), Q = (t) => {
@@ -66,8 +66,8 @@ const P = (t) => t !== null && (typeof t == "object" || typeof t == "function") 
   return n;
 }, x = (t, n, r, o) => [
   t,
-  A(n, r),
-  A(n, o)
+  p(n, r),
+  p(n, o)
 ], Y = (t, n, r, o, a, e) => {
   const s = R(t, [
     ...e || [],
@@ -75,31 +75,31 @@ const P = (t) => t !== null && (typeof t == "object" || typeof t == "function") 
   ]);
   return [
     // data
-    n || r ? s : A(
+    n || r ? s : p(
       s,
       (o == null ? void 0 : o.split(",")) || []
     ),
     // path
-    A(t, a),
+    p(t, a),
     // queries
-    A(t, e)
+    p(t, e)
   ];
 }, J = (t, n) => {
-  const [r, o] = n.split(y), a = $.test(n), [, e] = n.match(H) || [], [, , s] = n.match(L) || [], [, , , , c] = n.match(w) || [], _ = !!e, i = (e == null ? void 0 : e.split(",")) || [], p = (s == null ? void 0 : s.split(",")) || [], u = a ? !1 : g.test(n), f = c === G;
+  const [r, o] = n.split(F), a = $.test(n), [, e] = n.match(H) || [], [, , s] = n.match(L) || [], [, , , , c] = n.match(w) || [], _ = !!e, f = (e == null ? void 0 : e.split(",")) || [], i = (s == null ? void 0 : s.split(",")) || [], u = a ? !1 : g.test(n), T = c === G;
   return (...E) => {
-    const [T, b = {}, M = {}] = E, [O, N, d] = a ? x(
-      T,
+    const [A, b = {}, M = {}] = E, [O, N, d] = a ? x(
+      A,
       b,
-      i,
-      p
-    ) : Y(
-      T,
       f,
+      i
+    ) : Y(
+      A,
+      T,
       u,
       c,
-      i,
-      p
-    ), U = _ ? F(o, N) : o, j = m(d) ? "" : `?${C(d)}`;
+      f,
+      i
+    ), U = _ ? y(o, N) : o, j = m(d) ? "" : `?${I(d)}`;
     return t(
       {
         url: `${Q(U)}${j}`,
