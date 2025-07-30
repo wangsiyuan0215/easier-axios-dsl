@@ -18,7 +18,7 @@ yarn add @siyuan0215/easier-axios-dsl
 
 ## 🤙 优势
 
-未使用 easier-axios-dsl 之前，我们再对接接口的时候往往需要添加如下代码：
+未使用 easier-axios-dsl 之前，对接接口的时候往往需要添加如下代码：
 
 ```ts
 // api/index.ts
@@ -69,6 +69,8 @@ export default generatorAPIS<typeof APIS>(APIS);
 ```
 
 可以明显看出，使用 easier-axios-dsl 对接接口时 coding 更顺畅也更简洁。
+
+此外，还提供了智能的请求头处理机制，自动处理Content-Type设置，支持FormData转换，让文件上传等场景更加便捷。
 
 _默认导出的 `generatorAPIS<typeof APIS>(APIS);` 函数执行结果是对象。_
 
@@ -143,6 +145,48 @@ export type Options<T> = {
 
 _❗️ 需要注意的是，使用 `requestCreator` 创建后的 Axios 实例会丢失官方的请求拦截和响应拦截的**静态**配置方式，需要使用 `requestInterceptors` 和 `responseInterceptors` 配置项，同时也无法使用多拦截器的特性。_
 
+### 请求头处理机制
+
+`requestCreator` 创建的请求实例具有智能的请求头处理机制：
+
+- **默认Content-Type**：自动设置 `application/json`
+- **FormData支持**：当 `isFormData` 参数为 `true` 时，自动设置 `multipart/form-data`
+- **自定义覆盖**：如果传入的headers中包含Content-Type，会优先使用自定义值
+- **智能合并**：其他自定义headers会与默认headers正确合并
+
+```ts
+// 示例：智能请求头处理
+const request = requestCreator({
+  requestInterceptors: [],
+  responseInterceptors: [],
+});
+
+// 1. 默认JSON请求
+await request({
+  url: '/api/users',
+  method: 'POST',
+  params: { name: 'John' }
+});
+// Content-Type: application/json
+
+// 2. FormData请求
+await request({
+  url: '/api/upload',
+  method: 'POST',
+  params: { file: fileData }
+}, true);
+// Content-Type: multipart/form-data
+
+// 3. 自定义Content-Type
+await request({
+  url: '/api/export',
+  method: 'POST',
+  params: { data: exportData },
+  headers: { 'Content-Type': 'application/xml' }
+});
+// Content-Type: application/xml (自定义值优先)
+```
+
 ## 🧑🏽‍💻 如何使用？
 
 继续以上述改造后的接口声明文件为例，我们创建了如下三个接口的函数（服务）：
@@ -163,6 +207,25 @@ const fetchUserInfo = async (userId: string) => {
     // ...
   } catch(error) {
     console.log("getUserInfo =>", error)
+  }
+}
+
+// 文件上传示例
+const uploadFile = async (file: File, description: string) => {
+  try {
+    const result = await APIS.uploadFile(
+      { file, description },
+      undefined, // otherPayload
+      { 
+        headers: { 'Authorization': 'Bearer token' },
+        onUploadProgress: (progressEvent) => {
+          console.log('Upload progress:', progressEvent.loaded / progressEvent.total * 100);
+        }
+      }
+    );
+    return result;
+  } catch(error) {
+    console.log("uploadFile =>", error)
   }
 }
 </script>
@@ -192,68 +255,134 @@ APIS.exportFile(params, undefined, { responseType: "blob" });
 APIS.exportFile(params, void 0, { responseType: "blob" });
 ```
 
-## 🔌 如何新增接口声明？
+## 🔌 语法规则详解
 
-新声明一个接口时，需要遵照如下格式，每个部分（以 `[]` 内为一部分）均以空格隔开：
-
-```bash
-[POST|GET|PUT|DELETE|...] [url] [(d|data)|(d.f|d.formData|data.f|data.formData)|([d]|[data]))|(q|query)|path]:[(id,name,gender,...)|'*']
+### 基本格式
+```
+[HTTP方法] [URL] [参数载体类型]:[参数列表]
 ```
 
-其中：
+### 语法组成部分
 
-- `POST|GET|PUT|DELETE|...` HTTP 的请求方式；
-- `url` 请求地址；
-- 请求参数，格式为 `[参数载体类型]:[传递的参数 key]`，请注意**参数载体类型**和**需要传递的参数**需要以 `:` 冒号相连（不能出现空格）
-  - `(d|data)|(d.f|d.formData|data.f|data.formData)|([d]|[data]))` 对应 `POST` 或 `PUT` 请求的 Body 体，其中：
-    - 仅 `d` 或 `data` 指将参数放到正常 Body 体中（对象类型）；
-    - `d.f` 或 `d.formData` 或 `data.f` 或 `data.formData` 指需要传递的是 FormData 类型，但是调用接口函数时传递对象类型（内部会帮助你处理好）；
-    - `[d|data]` 指 Body 体传递的是数组，等价于：`data: [1,2,3,4]`；
-  - `q|query` 传递给 `GET` 或 `DELETE` 请求的 query 参数；
-  - `path` 表示将参数放到请求地址中进行传递（动态路由），比如：`api/getUserInfo/{uesrId}`；
-- `[(id,name,gender,...)|'*']` 参数的 key
-  - 枚举，如果有明确的 key，那么请以 `,` 逗号相连（**不能出现空格**），且最终请求后端接口时所传递的参数以此处声明的 key 为准；
-  - 通配符 `*` 如果需要传递的参数比较多，可以使用 `*` 来表示将所有的参数全部传给后端（跳过参数校验的阶段）；
+| 组成部分 | 说明 | 示例 |
+|---------|------|------|
+| **HTTP方法** | 请求方式 | `GET`、`POST`、`PUT`、`DELETE` |
+| **URL** | 请求地址 | `api/users/profile` |
+| **参数载体类型** | 参数传递方式 | `d:name,age`、`q:page,size`、`path:id` |
+| **参数列表** | 具体参数名 | `id,name,gender` 或 `*` |
 
-我们以 `GET` 和 `POST` 请求举几个例子，帮助大家理解：
+### 参数载体类型详解
 
-```js
-/**
- * POST:
- *    - `POST posts/save d:*`;
- *        equal: (params) => api.post({ url: baseUrl + 'posts/save', params }, true)
- *
- *    - `POST upload-file d:sourceType,systemType,fileName,file,remark`;
- *        equal: (types) => api.post({ url: baseUrl + 'upload-file', data: { file, remark } })
- *
- *    - `POST posts/list q:pageNumber,pageSize`;
- *        equal: (pageNumber, pageSize) => api.post({ url: baseUrl + 'posts/list', params: { pageNumber, pageSize} })
- *
- *    - `POST users/search [d] q:a`
- *        equal: (types) => api.post({ url: baseUrl + 'users/search' + '?a=1', data: types })
- *
- *    - `POST users/update d.f:a,b,c`
- *        equal: (data) => api.post({ url: baseUrl + 'users/update', data: FormData<{ a, b ,c }> }) and Content-Type is 'multipart/form-data'
- *
- * GET:
- *    - `GET users/getUserInfo q:userId`
- *        equal: (userId: string) => api.get({ url: baseUrl + 'users/getUserInfo', params: { userId } })
- *
- *    - `GET users/get/{id} path:id`
- *        equal: (id: string) => api.get({ url: baseUrl + 'users/get/' + id })
- * */
-```
+| 载体类型 | 适用请求 | 说明 | 示例 |
+|---------|---------|------|------|
+| `d` 或 `data` | POST/PUT | 普通对象参数，放入请求体 | `d:name,age` |
+| `d.f` 或 `data.formData` | POST/PUT | FormData类型，对象自动转换 | `d.f:file,description` |
+| `[d]` 或 `[data]` | POST/PUT | 数组参数 | `[d]` |
+| `q` 或 `query` | GET/DELETE | URL查询参数 | `q:page,size` |
+| `path` | 所有请求 | 动态路由参数 | `path:userId` |
+
+### 参数列表模式
+
+| 模式 | 语法 | 说明 | 示例 |
+|------|------|------|------|
+| **枚举模式** | `param1,param2,param3` | 明确指定参数名（逗号分隔，无空格） | `id,name,gender` |
+| **通配符模式** | `*` | 传递所有参数（跳过校验） | `*` |
+
+### 注意事项
+
+- 参数载体类型可多个，但不能重复
+- 载体类型和参数列表必须用冒号 `:` 连接，中间不能有空格
+- 枚举模式的参数名用逗号分隔，不能有空格
+- 通配符模式会跳过参数校验，传递所有传入的参数
+- 请求头处理遵循优先级：自定义Content-Type > FormData自动设置 > 默认JSON类型
+
+### 使用示例
+
+#### POST 请求示例
+
+- **`POST posts/save d:*`** - 保存文章，传递所有参数
+  ```ts
+  api.post({ url: 'posts/save', data: params })
+  ```
+
+- **`POST upload-file d:sourceType,systemType,fileName,file,remark`** - 文件上传，指定参数
+  ```ts
+  api.post({ url: 'upload-file', data: { fileName, file, remark } })
+  ```
+
+- **`POST posts/list q:pageNumber,pageSize`** - 获取文章列表，查询参数
+  ```ts
+  api.post({ url: 'posts/list', params: { pageNumber, pageSize } })
+  ```
+
+- **`POST users/search [d] q:a`** - 用户搜索，数组参数 + 查询参数
+  ```ts
+  api.post({ url: 'users/search?a=1', data: searchData })
+  ```
+
+- **`POST users/update d.f:a,b,c`** - 用户更新，FormData 格式
+  ```ts
+  api.post({ url: 'users/update', data: FormData, headers: { 'Content-Type': 'multipart/form-data' } })
+  ```
+
+- **`POST api/upload d:file`** - 文件上传，自定义请求头
+  ```ts
+  // 自动处理Content-Type，支持自定义headers
+  api.post({ 
+    url: 'api/upload', 
+    data: fileData,
+    headers: { 
+      'Authorization': 'Bearer token',
+      'X-Custom-Header': 'value'
+    }
+  }, true) // isFormData = true
+  ```
+
+#### GET 请求示例
+
+- **`GET users/getUserInfo q:userId`** - 获取用户信息，查询参数
+  ```ts
+  api.get({ url: 'users/getUserInfo', params: { userId } })
+  ```
+
+- **`GET users/get/{id} path:id`** - 获取用户，路径参数
+  ```ts
+  api.get({ url: 'users/get/' + id })
+  ```
 
 ## 👻 单元测试
 
-尽可能的覆盖所有的代码，保证代码的质量。
+尽可能的覆盖所有的代码，保证代码的质量。我们为所有核心功能提供了全面的单元测试：
+
+### 测试覆盖范围
+
+- ✅ **基本功能测试** - 请求实例创建、配置选项
+- ✅ **拦截器测试** - 请求/响应拦截器设置
+- ✅ **HTTP方法测试** - GET、POST、PUT、DELETE请求处理
+- ✅ **FormData处理测试** - 文件上传、数据转换
+- ✅ **请求头处理测试** - Content-Type自动设置、自定义headers
+- ✅ **运行时配置测试** - 动态配置选项传递
+- ✅ **错误处理测试** - 异常情况处理
+- ✅ **边界情况测试** - 空参数、复杂对象等边界场景
+
+### 测试覆盖率
 
 ![alt text](coverage.png)
 
+所有核心功能都有完整的测试覆盖，确保代码的可靠性和稳定性。
 
-## 📦 未来计划？
+## 📦 版本更新
+
+### 最新改进
+
+- ✅ **智能请求头处理** - 优化Content-Type设置逻辑，支持自定义覆盖
+- ✅ **完善的单元测试** - 新增21个测试用例，覆盖所有核心功能
+- ✅ **FormData支持增强** - 改进FormData转换和Content-Type处理
+
+### 未来计划
 
 - [X] 单元测试的编写；
+- [X] 智能请求头处理机制；
 - [ ] 支持多拦截器；
 - [ ] 支持更多的载体类型，比如 Map 等；
 - [ ] 支持原生小程序；
