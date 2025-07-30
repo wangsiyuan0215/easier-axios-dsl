@@ -58,18 +58,17 @@ export const creator = <T extends any>({
     } & RestOptions,
     isFormData = false
   ) {
-    const { headers = {}, ...restRuntimeOptions } = (restOptions ||
-      {}) as RestOptions;
+    const { headers = {}, ...restRuntimeOptions } = (restOptions || {}) as RestOptions;
 
     try {
       const { data } = await api({
         url,
         method,
         headers: {
+          ...headers,
           "Content-Type": isFormData
             ? CONTENT_TYPES.FORM_DATA
-            : CONTENT_TYPES.JSON,
-          ...headers,
+            : (headers && headers["Content-Type"]) || CONTENT_TYPES.JSON,
         },
         ...(method === METHODS.POST || method === METHODS.PUT
           ? {
