@@ -3,30 +3,37 @@ import { AxiosResponse } from 'axios';
 
 declare type ArrayData = any[];
 
-declare type AxiosConfig = AxiosRequestConfig;
+export declare const init: (config: InitConfig) => {
+    generatorAPIS: <T extends Record<string, string>>(apis: T) => Record<keyof T, <U extends any>(...args: RequestParams) => Promise<U>>;
+    requestInstance: RequestInstance;
+};
 
-export declare const G: <T extends Record<string, string>>(request: RequestInstance<any>, apis: T) => Record<keyof T, (...args: RequestParams) => Promise<any>>;
+declare type InitConfig = AxiosRequestConfig & Options;
 
 declare type MajorPayload = Payload | ArrayData;
 
-declare type OnFulfilled<T extends AxiosRequestConfig> = (value: T) => T | Promise<T>
+declare type OnFulfilled<T extends AxiosRequestConfig> = (
+value: T
+) => T | Promise<T>;
 
-declare type OnRejected = (error: any) => any
+declare type OnRejected = (error: any) => any;
 
-declare type Options<T extends any> = {
-    requestInterceptors: [OnFulfilled<AxiosRequestConfig>, OnRejected]
-    responseInterceptors: [OnFulfilled<AxiosResponse<T>>, OnRejected]
-}
+declare type Options = {
+    requestInterceptors: [OnFulfilled<AxiosRequestConfig>, OnRejected];
+    responseInterceptors: [OnFulfilled<AxiosResponse>, OnRejected];
+};
 
 declare type Payload = Record<string, any>;
 
-export declare const requestCreator: <T extends unknown>({ requestInterceptors, responseInterceptors, ...axiosGlobalStaticOptions }: AxiosRequestConfig & Options<T>) => RequestInstance<T>;
+declare type RequestConfig = AxiosRequestConfig & {
+    __isFormData?: boolean;
+    returnResponse?: boolean;
+};
 
-declare type RequestInstance<T extends any> = (
-options: any,
-isFormData?: boolean
-) => Promise<T>
+declare type RequestInstance = <T extends any>(
+options: RequestConfig
+) => Promise<T | AxiosResponse<T>>;
 
-declare type RequestParams = [MajorPayload?, Payload?, AxiosConfig?];
+declare type RequestParams = [MajorPayload?, Payload?, RequestConfig?];
 
 export { }
