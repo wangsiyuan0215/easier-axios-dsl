@@ -658,6 +658,10 @@ describe("generator", () => {
 
       // Test function signature
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test actual function call
+      const result = await apiFunction();
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle GET request with query parameters", async () => {
@@ -674,6 +678,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.getWithQuery;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with query parameters
+      const result = await apiFunction({ page: 1, size: 10 });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle GET request with path parameters", async () => {
@@ -690,6 +698,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.getWithPath;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with path parameters
+      const result = await apiFunction({ id: 123 });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle POST request with data", async () => {
@@ -706,6 +718,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.postWithData;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with data
+      const result = await apiFunction({ name: "John", email: "john@example.com" });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle POST request with form data", async () => {
@@ -722,6 +738,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.postWithFormData;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with form data
+      const result = await apiFunction({ file: "test.txt", description: "Test file" });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle POST request with array data", async () => {
@@ -738,6 +758,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.postWithArray;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with array data
+      const result = await apiFunction([1, 2, 3], { extra: "data" });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle POST request with wildcard pattern", async () => {
@@ -754,6 +778,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.postWithWildcard;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with wildcard pattern
+      const result = await apiFunction({ name: "John", email: "john@example.com", age: 30 });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle complex API with all parameter types", async () => {
@@ -786,6 +814,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.emptyDataApi;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with empty data object
+      const result = await apiFunction({});
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle API with non-empty data object", async () => {
@@ -802,6 +834,10 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.nonEmptyDataApi;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with non-empty data object
+      const result = await apiFunction({ name: "John", email: "john@example.com" });
+      expect(result).toEqual({ data: { success: true } });
     });
 
     it.concurrent("should handle API with array data", async () => {
@@ -850,6 +886,113 @@ describe("generator", () => {
       const apiFunction = generatedAPIs.nonFormDataApi;
 
       expect(apiFunction).toBeTypeOf("function");
+      
+      // Test without form data flag
+      const result = await apiFunction({ name: "John", email: "john@example.com" });
+      expect(result).toEqual({ data: { success: true } });
+    });
+
+    it.concurrent("should handle API with returnResponse config", async () => {
+      const { generatorAPIS } = init({
+        requestInterceptors: [vi.fn(), vi.fn()],
+        responseInterceptors: [vi.fn(), vi.fn()],
+      });
+
+      const apis = {
+        returnResponseApi: "GET /api/v1/users",
+      };
+
+      const generatedAPIs = generatorAPIS(apis);
+      const apiFunction = generatedAPIs.returnResponseApi;
+
+      expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with returnResponse config
+      const result = await apiFunction({}, {}, { returnResponse: true });
+      expect(result).toEqual({ data: { success: true } });
+    });
+
+    it.concurrent("should handle API with other axios config", async () => {
+      const { generatorAPIS } = init({
+        requestInterceptors: [vi.fn(), vi.fn()],
+        responseInterceptors: [vi.fn(), vi.fn()],
+      });
+
+      const apis = {
+        axiosConfigApi: "GET /api/v1/users",
+      };
+
+      const generatedAPIs = generatorAPIS(apis);
+      const apiFunction = generatedAPIs.axiosConfigApi;
+
+      expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with other axios config
+      const result = await apiFunction({}, {}, { timeout: 5000, headers: { 'X-Custom': 'value' } });
+      expect(result).toEqual({ data: { success: true } });
+    });
+
+    it.concurrent("should handle API with array data and empty other payload", async () => {
+      const { generatorAPIS } = init({
+        requestInterceptors: [vi.fn(), vi.fn()],
+        responseInterceptors: [vi.fn(), vi.fn()],
+      });
+
+      const apis = {
+        arrayDataEmptyPayloadApi: "POST /api/v1/users/batch [d]",
+      };
+
+      const generatedAPIs = generatorAPIS(apis);
+      const apiFunction = generatedAPIs.arrayDataEmptyPayloadApi;
+
+      expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with array data and empty other payload
+      const result = await apiFunction([1, 2, 3]);
+      expect(result).toEqual({ data: { success: true } });
+    });
+
+    it.concurrent("should handle API with path and query parameters", async () => {
+      const { generatorAPIS } = init({
+        requestInterceptors: [vi.fn(), vi.fn()],
+        responseInterceptors: [vi.fn(), vi.fn()],
+      });
+
+      const apis = {
+        pathAndQueryApi: "GET /api/v1/users/{id}/posts q:page,size path:id",
+      };
+
+      const generatedAPIs = generatorAPIS(apis);
+      const apiFunction = generatedAPIs.pathAndQueryApi;
+
+      expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with path and query parameters
+      const result = await apiFunction({ id: 123, page: 1, size: 10 });
+      expect(result).toEqual({ data: { success: true } });
+    });
+
+    it.concurrent("should handle API with complex data structure", async () => {
+      const { generatorAPIS } = init({
+        requestInterceptors: [vi.fn(), vi.fn()],
+        responseInterceptors: [vi.fn(), vi.fn()],
+      });
+
+      const apis = {
+        complexDataApi: "POST /api/v1/users d:name,profile",
+      };
+
+      const generatedAPIs = generatorAPIS(apis);
+      const apiFunction = generatedAPIs.complexDataApi;
+
+      expect(apiFunction).toBeTypeOf("function");
+      
+      // Test with complex data structure
+      const result = await apiFunction({ 
+        name: "John", 
+        profile: { age: 30, city: "New York" } 
+      });
+      expect(result).toEqual({ data: { success: true } });
     });
   });
 });

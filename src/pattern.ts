@@ -1,3 +1,5 @@
+import { METHODS } from "./methods";
+
 export const Regexp_SEPARATOR = /\s{1,}/;
 
 export const Regexp_COMMON_PATTERN = "*";
@@ -15,6 +17,24 @@ export const Regexp_MATCH_QUERY_STRING = /\s+(q|query):(\S*)(\s|$)/;
 
 export const getMethodAndUrl = (requestString: string) => {
   const [method, url] = requestString.split(Regexp_SEPARATOR);
+
+  if (!method || !METHODS[method?.toUpperCase()]) {
+    throw new Error(`[${requestString}]: Invalid method: ${method}, please use one of the following methods: ${Object.values(METHODS).join(", ")}`);
+  }
+
+  // 校验 url（不包括协议），比如 /a/b/c, /a/b/{c}, {a}/b/c, a/b/c, a/{b}/c
+  // 允许以 / 开头，或以 {xxx} 开头，或以普通字符开头，后面可以跟 /xxx 或 /{xxx}，中间不能有空格
+  const urlPattern = /^\/?(\{[a-zA-Z_][\w]*\}|[a-zA-Z0-9_\-\.]+)(\/(\{[a-zA-Z_][\w]*\}|[a-zA-Z0-9_\-\.]+))*([?][^ ]*)?$/;
+  if (
+    !url ||
+    /^\s*$/.test(url) ||
+    !urlPattern.test(url?.trim())
+  ) {
+    throw new Error(
+      `[${requestString}]: Invalid url: ${url}, please input a valid url, e.g. /a/b/c, /a/b/{c}, {a}/b/c, a/b/c, a/{b}/c`
+    );
+  }
+
   return { method, url };
 };
 

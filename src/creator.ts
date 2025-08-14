@@ -1,9 +1,10 @@
 import axios, {
   AxiosRequestConfig,
   AxiosResponse,
-  Method,
   ResponseType,
 } from "axios";
+
+import { METHODS, type Method } from "./methods";
 
 import type { InitConfig, RequestConfig, RequestInstance } from "./typing";
 
@@ -23,17 +24,6 @@ const RESPONSE_TYPE: Record<string, ResponseType> = {
   ARRAY_BUFFER: "arraybuffer",
   STREAM: "stream",
   DOCUMENT: "document",
-};
-
-// 请求方法
-const METHODS: Record<string, Method> = {
-  GET: "GET",
-  PUT: "PUT",
-  POST: "POST",
-  DELETE: "DELETE",
-  PATCH: "PATCH",
-  OPTIONS: "OPTIONS",
-  HEAD: "HEAD",
 };
 
 export const creator = ({

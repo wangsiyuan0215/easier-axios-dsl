@@ -58,7 +58,7 @@ describe("creator", () => {
 
       expect(request).toBeTypeOf("function");
       expect(mockedAxios.create).toHaveBeenCalledWith({
-        timeout: 60000,
+        timeout: 3000,
       });
     });
 
