@@ -1,6 +1,14 @@
-import { stringify as M } from "qs";
-import U from "axios";
-const b = 3e3, S = {
+import { stringify as N } from "qs";
+import M from "axios";
+const c = {
+  GET: "GET",
+  PUT: "PUT",
+  POST: "POST",
+  DELETE: "DELETE",
+  PATCH: "PATCH",
+  OPTIONS: "OPTIONS",
+  HEAD: "HEAD"
+}, U = 3e3, D = {
   JSON: "application/json",
   FORM_DATA: "multipart/form-data"
 }, O = {
@@ -10,32 +18,24 @@ const b = 3e3, S = {
   ARRAY_BUFFER: "arraybuffer",
   STREAM: "stream",
   DOCUMENT: "document"
-}, a = {
-  GET: "GET",
-  PUT: "PUT",
-  POST: "POST",
-  DELETE: "DELETE",
-  PATCH: "PATCH",
-  OPTIONS: "OPTIONS",
-  HEAD: "HEAD"
 }, C = ({
   // 请求拦截器
   requestInterceptors: t,
   // 响应拦截器
   responseInterceptors: e,
   // Axios 静态全局配置
-  ...r
+  ...n
 }) => {
-  const n = U.create({
-    timeout: b,
-    ...r
+  const r = M.create({
+    timeout: U,
+    ...n
   });
-  return t.length && n.interceptors.request.use(...t), e.length && n.interceptors.response.use(...e), async function({
+  return t.length && r.interceptors.request.use(...t), e.length && r.interceptors.response.use(...e), async function({
     url: o,
     method: s,
     data: E,
-    params: i,
-    returnResponse: P,
+    params: T,
+    returnResponse: l,
     __isFormData: u,
     ...d
   }) {
@@ -45,27 +45,27 @@ const b = 3e3, S = {
       ...h
     } = d || {};
     try {
-      const T = await n({
+      const i = await r({
         url: o,
         method: s,
         headers: {
           ...A,
-          "Content-Type": u ? S.FORM_DATA : A && A["Content-Type"] || S.JSON
+          "Content-Type": u ? D.FORM_DATA : A && A["Content-Type"] || D.JSON
         },
-        ...[a.POST, a.PUT, a.PATCH].includes(
+        ...[c.POST, c.PUT, c.PATCH].includes(
           s
         ) ? {
-          data: u ? Object.keys(i).reduce(
-            (p, f) => (p.append(f, i[f]), p),
+          data: u ? Object.keys(T).reduce(
+            (R, f) => (R.append(f, T[f]), R),
             new FormData()
-          ) : i
+          ) : T
         } : {},
         ...[
-          a.GET,
-          a.DELETE,
-          a.OPTIONS,
-          a.HEAD
-        ].includes(s) ? { params: i } : {},
+          c.GET,
+          c.DELETE,
+          c.OPTIONS,
+          c.HEAD
+        ].includes(s) ? { params: T } : {},
         ...h
       });
       return [
@@ -73,78 +73,85 @@ const b = 3e3, S = {
         O.STREAM,
         O.DOCUMENT,
         O.ARRAY_BUFFER
-      ].includes(_) || P ? T : T.data;
-    } catch (T) {
-      throw T;
+      ].includes(_) || l ? i : i.data;
+    } catch (i) {
+      throw i;
     }
   };
-}, D = (t) => Object.prototype.toString.call(t) === "[object Array]";
-function l(t) {
-  return t == null ? !0 : typeof t == "boolean" ? !1 : typeof t == "number" ? isNaN(t) || t === 0 : typeof t == "string" ? t.trim().length === 0 : D(t) ? t.length === 0 : g(t) ? Object.keys(t).length === 0 : t instanceof Map || t instanceof Set ? t.size === 0 : !1;
+}, P = (t) => Object.prototype.toString.call(t) === "[object Array]";
+function I(t) {
+  return t == null ? !0 : typeof t == "boolean" ? !1 : typeof t == "number" ? isNaN(t) || t === 0 : typeof t == "string" ? t.trim().length === 0 : P(t) ? t.length === 0 : S(t) ? Object.keys(t).length === 0 : t instanceof Map || t instanceof Set ? t.size === 0 : !1;
 }
-const g = (t) => t !== null && (typeof t == "object" || typeof t == "function") && !D(t) && !(t instanceof Date) && !(t instanceof Map), m = (t, e) => {
-  const r = { ...t };
-  return e.forEach((n) => {
-    delete r[n];
-  }), r;
-}, F = (t, e) => t.replace(/{([^{]*)}/g, (r, n) => e[n]), H = (t) => {
+const S = (t) => t !== null && (typeof t == "object" || typeof t == "function") && !P(t) && !(t instanceof Date) && !(t instanceof Map), m = (t, e) => {
+  const n = { ...t };
+  return e.forEach((r) => {
+    delete n[r];
+  }), n;
+}, F = (t, e) => t.replace(/{([^{]*)}/g, (n, r) => e[r]), j = (t) => {
   const [e] = t.split("?");
   return e;
-}, R = (t, e) => !t || !(e != null && e.length) ? {} : e.reduce(
-  (r, n) => ({ ...r, [n]: t[n] }),
+}, p = (t, e) => !t || !(e != null && e.length) ? {} : e.reduce(
+  (n, r) => ({ ...n, [r]: t[r] }),
   {}
-), y = (t, e, r, n) => [
+), H = (t, e, n, r) => [
   t,
-  R(e, r),
-  R(e, n)
-], j = (t, e, r, n, c, o) => {
+  p(e, n),
+  p(e, r)
+], $ = (t, e, n, r, a, o) => {
   const s = m(t, [
     ...o || [],
-    ...c || []
+    ...a || []
   ]);
   return [
     // data
-    e || r ? s : R(
+    e || n ? s : p(
       s,
-      n || []
+      r || []
     ),
     // path
-    R(t, c),
+    p(t, a),
     // queries
-    R(t, o)
+    p(t, o)
   ];
-}, x = /\s{1,}/, B = "*", L = /\s\[d|(data)]\s?/, Y = /\s(d|(data))\.(f|formData):/, G = /\s+(d|data)(\.(f|formData))?:(\S*)(\s|$)/, Q = /\s+path:(\S*)(\s|$)/, $ = /\s+(q|query):(\S*)(\s|$)/, w = (t) => {
-  const [e, r] = t.split(x);
-  return { method: e, url: r };
-}, J = (t) => {
-  const [, e] = t.match(Q) || [];
-  return (e == null ? void 0 : e.split(",")) || [];
-}, q = (t) => {
-  const [, , e] = t.match($) || [];
-  return (e == null ? void 0 : e.split(",")) || [];
+}, w = /\s{1,}/, y = "*", x = /\s\[d|(data)]\s?/, B = /\s(d|(data))\.(f|formData):/, L = /\s+(d|data)(\.(f|formData))?:(\S*)(\s|$)/, Y = /\s+path:(\S*)(\s|$)/, G = /\s+(q|query):(\S*)(\s|$)/, Q = (t) => {
+  const [e, n] = t.split(w);
+  if (!e || !c[e == null ? void 0 : e.toUpperCase()])
+    throw new Error(`[${t}]: Invalid method: ${e}, please use one of the following methods: ${Object.values(c).join(", ")}`);
+  const r = /^\/?(\{[a-zA-Z_][\w]*\}|[a-zA-Z0-9_\-\.]+)(\/(\{[a-zA-Z_][\w]*\}|[a-zA-Z0-9_\-\.]+))*([?][^ ]*)?$/;
+  if (!n || /^\s*$/.test(n) || !r.test(n == null ? void 0 : n.trim()))
+    throw new Error(
+      `[${t}]: Invalid url: ${n}, please input a valid url, e.g. /a/b/c, /a/b/{c}, {a}/b/c, a/b/c, a/{b}/c`
+    );
+  return { method: e, url: n };
 }, z = (t) => {
-  const [, , , , e] = t.match(G) || [];
+  const [, e] = t.match(Y) || [];
   return (e == null ? void 0 : e.split(",")) || [];
-}, W = (t) => L.test(t), X = (t) => Y.test(t), V = (t) => !!(t != null && t.length) && t[0] === B, Z = (t, e) => {
-  const r = J(e), n = q(e), c = z(e), o = !!r.length, s = W(e), E = s ? !1 : X(e), i = V(c);
-  return (...P) => {
-    const [u, d = {}, A = {}] = P, [_, h, T] = s ? y(
+}, Z = (t) => {
+  const [, , e] = t.match(G) || [];
+  return (e == null ? void 0 : e.split(",")) || [];
+}, J = (t) => {
+  const [, , , , e] = t.match(L) || [];
+  return (e == null ? void 0 : e.split(",")) || [];
+}, W = (t) => x.test(t), X = (t) => B.test(t), q = (t) => !!(t != null && t.length) && t[0] === y, V = (t, e) => {
+  const n = z(e), r = Z(e), a = J(e), o = !!n.length, s = W(e), E = s ? !1 : X(e), T = q(a);
+  return (...l) => {
+    const [u, d = {}, A = {}] = l, [_, h, i] = s ? H(
       u,
       d,
-      r,
-      n
-    ) : j(
+      n,
+      r
+    ) : $(
       u,
-      i,
+      T,
       E,
-      c,
-      r,
-      n
-    ), { method: p, url: f } = w(e), I = o ? F(f, h) : f, N = l(T) ? "" : `?${M(T)}`;
+      a,
+      n,
+      r
+    ), { method: R, url: f } = Q(e), g = o ? F(f, h) : f, b = I(i) ? "" : `?${N(i)}`;
     return t({
-      url: `${H(I)}${N}`,
-      method: p.toLocaleUpperCase(),
-      ...g(_) && !D(_) && l(_) ? {} : { params: _ },
+      url: `${j(g)}${b}`,
+      method: R.toLocaleUpperCase(),
+      ...S(_) && !P(_) && I(_) ? {} : { params: _ },
       ...m(A, [
         "url",
         "data",
@@ -159,10 +166,10 @@ const g = (t) => t !== null && (typeof t == "object" || typeof t == "function") 
 }, v = (t) => {
   const e = C(t);
   return {
-    generatorAPIS: (n) => Object.keys(n).reduce(
-      (c, o) => ({
-        ...c,
-        [o]: Z(e, n[o])
+    generatorAPIS: (r) => Object.keys(r).reduce(
+      (a, o) => ({
+        ...a,
+        [o]: V(e, r[o])
       }),
       {}
     ),
